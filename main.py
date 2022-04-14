@@ -15,7 +15,6 @@ class Item(BaseModel):
 
 app = FastAPI()
 
-# テスト環境用の設定
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -66,203 +65,64 @@ async def cal_bonds(data: Item):
     
     # ユーザーが選択した投資の対象に応じて、計算に使用する過去の市場データを変える
     # 5つの場合分け
-    # 米国10年国債、日経平均株価、米国株SP500、金投資、その他(異常値)
-
-    # 米国10年国債の場合
+    # 米国10年国債、米国株SP500、日経平均株価、金投資、その他(異常値)    
     if invest_type == "bonds":
-
-        while case_count < int(50000):
-            investments = int(start_value)
-            start_year = random.randrange(0, len(bonds))
-            duration = int(random.triangular(int(min_years), int(max_years),int(most_likely_years)))
-            end_year = start_year + duration
-            lifespan = [i for i in range(start_year, end_year)]
-            bankrupt = 'no'
-            
-            # 各ケースの一時リストを作る
-            lifespan_returns = []
-            lifespan_infl = []
-            for i in lifespan:
-                lifespan_returns.append(bonds[i % len(bonds)])
-                lifespan_infl.append(infl_rate[i % len(infl_rate)])
-            
-            # 各ケースで引退生活の各年をループする
-            for index, i in enumerate(lifespan_returns):
-                infl = lifespan_infl[index]
-                
-                # 最初の年はインフレの調節をしない
-                if index == 0:
-                    withdraw_infl_adj = int(withdrawal)
-                else:
-                    withdraw_infl_adj = int(withdraw_infl_adj * (1+infl))
-                    
-                investments -= withdraw_infl_adj
-                investments = int(investments * (1+i))
-                
-                if investments <= 0:
-                    bankrupt = 'yes'
-                    break
-                
-            if bankrupt == 'yes':
-                outcome.append(0)
-                bankrupt_count += 1
-            else:
-                outcome.append(investments)
-                
-            case_count += 1
-
-        else:
-            pass    
-            """モンテカルロシミュレーション、ループ処理ここで終わり"""
-    
-    # 米国株SP500の場合
-    elif invest_type == "sp500":
-
-        while case_count < int(50000):
-                investments = int(start_value)
-                start_year = random.randrange(0, len(sp500))
-                duration = int(random.triangular(int(min_years), int(max_years),int(most_likely_years)))
-                end_year = start_year + duration
-                lifespan = [i for i in range(start_year, end_year)]
-                bankrupt = 'no'
-                
-                # 各ケースの一時リストを作る
-                lifespan_returns = []
-                lifespan_infl = []
-                for i in lifespan:
-                    lifespan_returns.append(sp500[i % len(sp500)])
-                    lifespan_infl.append(infl_rate[i % len(infl_rate)])
-                
-                # 各ケースで引退生活の各年をループする
-                for index, i in enumerate(lifespan_returns):
-                    infl = lifespan_infl[index]
-                    
-                    # 最初の年はインフレの調節をしない
-                    if index == 0:
-                        withdraw_infl_adj = int(withdrawal)
-                    else:
-                        withdraw_infl_adj = int(withdraw_infl_adj * (1+infl))
-                        
-                    investments -= withdraw_infl_adj
-                    investments = int(investments * (1+i))
-                    
-                    if investments <= 0:
-                        bankrupt = 'yes'
-                        break
-                    
-                if bankrupt == 'yes':
-                    outcome.append(0)
-                    bankrupt_count += 1
-                else:
-                    outcome.append(investments)
-                    
-                case_count += 1
-
-        else:
-            pass    
-            """モンテカルロシミュレーション、ループ処理ここで終わり"""
-
-    # 日経平均株価の場合
+        invest = bonds
+    elif invest_type == "sp500": 
+        invest = sp500
     elif invest_type == "nikkei":
-
-        while case_count < int(50000):
-            investments = int(start_value)
-            start_year = random.randrange(0, len(nikkei))
-            duration = int(random.triangular(int(min_years), int(max_years),int(most_likely_years)))
-            end_year = start_year + duration
-            lifespan = [i for i in range(start_year, end_year)]
-            bankrupt = 'no'
-            
-            # 各ケースの一時リストを作る
-            lifespan_returns = []
-            lifespan_infl = []
-            for i in lifespan:
-                lifespan_returns.append(nikkei[i % len(nikkei)])
-                lifespan_infl.append(infl_rate[i % len(infl_rate)])
-            
-            # 各ケースで引退生活の各年をループする
-            for index, i in enumerate(lifespan_returns):
-                infl = lifespan_infl[index]
-                
-                # 最初の年はインフレの調節をしない
-                if index == 0:
-                    withdraw_infl_adj = int(withdrawal)
-                else:
-                    withdraw_infl_adj = int(withdraw_infl_adj * (1+infl))
-                    
-                investments -= withdraw_infl_adj
-                investments = int(investments * (1+i))
-                
-                if investments <= 0:
-                    bankrupt = 'yes'
-                    break
-                
-            if bankrupt == 'yes':
-                outcome.append(0)
-                bankrupt_count += 1
-            else:
-                outcome.append(investments)
-                
-            case_count += 1
-
-        else:
-            pass    
-            """モンテカルロシミュレーション、ループ処理ここで終わり"""
-
-    # 金投資の場合
+        invest = nikkei
     elif invest_type == "gold":
-
-        
-        while case_count < int(50000):
-            investments = int(start_value)
-            start_year = random.randrange(0, len(gold))
-            duration = int(random.triangular(int(min_years), int(max_years),int(most_likely_years)))
-            end_year = start_year + duration
-            lifespan = [i for i in range(start_year, end_year)]
-            bankrupt = 'no'
-            
-            # 各ケースの一時リストを作る
-            lifespan_returns = []
-            lifespan_infl = []
-            for i in lifespan:
-                lifespan_returns.append(gold[i % len(gold)])
-                lifespan_infl.append(infl_rate[i % len(infl_rate)])
-            
-            # 各ケースで引退生活の各年をループする
-            for index, i in enumerate(lifespan_returns):
-                infl = lifespan_infl[index]
-                
-                # 最初の年はインフレの調節をしない
-                if index == 0:
-                    withdraw_infl_adj = int(withdrawal)
-                else:
-                    withdraw_infl_adj = int(withdraw_infl_adj * (1+infl))
-                    
-                investments -= withdraw_infl_adj
-                investments = int(investments * (1+i))
-                
-                if investments <= 0:
-                    bankrupt = 'yes'
-                    break
-                
-            if bankrupt == 'yes':
-                outcome.append(0)
-                bankrupt_count += 1
-            else:
-                outcome.append(investments)
-                
-            case_count += 1
-
-        else:
-            pass    
-            """モンテカルロシミュレーション、ループ処理ここで終わり"""
-
-    # 投資の対象が4つのうち、どれでもない(異常値)場合
+        invest = gold    
+      # 投資の対象が4つのうち、どれでもない(異常値)場合
     else:
         sys.exit(1)
 
+    while case_count < int(50000):
+        investments = int(start_value)
+        start_year = random.randrange(0, len(invest))
+        duration = int(random.triangular(int(min_years), int(max_years),int(most_likely_years)))
+        end_year = start_year + duration
+        lifespan = [i for i in range(start_year, end_year)]
+        bankrupt = 'no'
+        
+        # 各ケースの一時リストを作る
+        lifespan_returns = []
+        lifespan_infl = []
+        for i in lifespan:
+            lifespan_returns.append(invest[i % len(invest)])
+            lifespan_infl.append(infl_rate[i % len(infl_rate)])
+        
+        # 各ケースで引退生活の各年をループする
+        for index, i in enumerate(lifespan_returns):
+            infl = lifespan_infl[index]
+            
+            # 最初の年はインフレの調節をしない
+            if index == 0:
+                withdraw_infl_adj = int(withdrawal)
+            else:
+                withdraw_infl_adj = int(withdraw_infl_adj * (1+infl))
+                
+            investments -= withdraw_infl_adj
+            investments = int(investments * (1+i))
+            
+            if investments <= 0:
+                bankrupt = 'yes'
+                break
+            
+        if bankrupt == 'yes':
+            outcome.append(0)
+            bankrupt_count += 1
+        else:
+            outcome.append(investments)
+            
+        case_count += 1
 
-
+    else:
+        pass    
+        """モンテカルロシミュレーション、ループ処理ここで終わり"""
+ 
+ 
     """シミュレーションの結果から資金が尽きる確率を計算する"""
     total = len(outcome)
     odds = round(100 * bankrupt_count / total, 1)
